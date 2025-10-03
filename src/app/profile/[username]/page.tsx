@@ -8,16 +8,19 @@ import { notFound } from "next/navigation";
 import { Metadata } from "next";
 import ProfilePageClient from "./ProfilePageClient";
 
-// Define interface for the page params
+// Define interface for the page params - params is now a Promise in Next.js 15
 interface ProfileParams {
-  params: {
+  params: Promise<{
     username: string;
-  };
+  }>;
 }
 
 // Add proper type for generateMetadata
-export async function generateMetadata({ params }: ProfileParams): Promise<Metadata> {
-  const user = await getProfileByUsername(params.username);
+export async function generateMetadata({
+  params,
+}: ProfileParams): Promise<Metadata> {
+  const { username } = await params; // Await params
+  const user = await getProfileByUsername(username);
   if (!user) return {};
 
   return {
@@ -28,7 +31,8 @@ export async function generateMetadata({ params }: ProfileParams): Promise<Metad
 
 // Add proper types for the server component
 async function ProfilePageServer({ params }: ProfileParams) {
-  const user = await getProfileByUsername(params.username);
+  const { username } = await params; // Await params
+  const user = await getProfileByUsername(username);
 
   if (!user) notFound();
 
